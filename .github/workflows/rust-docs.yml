@@ -21,7 +21,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Create rustdoc
-        run: cargo doc --all --features ecma_plugin_transform --features ecma_loader --features ecma_utils --features ecma_quote --features ecma_visit --features ecma_transforms --features __testing_transform --features css_compat --features css_codegen --features css_minifier --features css_prefixer --features css_parser --features common_tty
+        run: cargo doc --document-private-items
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.8
