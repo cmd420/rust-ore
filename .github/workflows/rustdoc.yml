@@ -1,0 +1,31 @@
+name: Rust Docs
+
+on:
+  push:
+    branches:
+      - main  # Adjust this branch according to your main branch name
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up Rust
+      uses: actions/setup-rust@v1
+
+    - name: Build Docs
+      run: |
+        cargo doc --no-deps
+
+    - name: Publish Docs to gh-pages
+      run: |
+        git config user.name "${{ github.actor }}"
+        git config user.email "${{ github.actor }}@users.noreply.github.com"
+        git branch gh-pages
+        git checkout gh-pages
+        git add -A
+        git commit -m "Update docs"
+        git push origin gh-pages
