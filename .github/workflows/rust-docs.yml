@@ -1,8 +1,6 @@
 name: Docs
 
 on:
-  schedule:
-    - cron: '0 * * * *'
   push:
     branches:
       -  main
@@ -20,7 +18,7 @@ jobs:
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Create rustdoc
+      - name: Create documentation
         run: cargo doc --document-private-items
 
       - name: Deploy
@@ -31,4 +29,3 @@ jobs:
           folder: target/doc
           clean: true
           commit-message: "Update docs"
-          single-commit: true
