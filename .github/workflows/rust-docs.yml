@@ -1,28 +1,36 @@
-name: Rust Docs
+name: Docs
 
 on:
+  schedule:
+    - cron: '0 * * * *'
   push:
     branches:
-      - main
+      -  main
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  rustdoc:
+    name: Rustdoc
+    runs-on: macos-latest
 
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
+      - uses: actions/checkout@v3
+        with:
+          repository: 'cmd420/rust-ore'
 
-    - name: Build Docs
-      run: |
-        cargo doc --no-deps
+      - name: Install Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
 
-    - name: Publish Docs to gh-pages
-      run: |
-        git config user.name "${{ github.actor }}"
-        git config user.email "${{ github.actor }}@users.noreply.github.com"
-        git branch gh-pages
-        git checkout gh-pages
-        git add -A
-        git commit -m "Update docs"
-        git push origin gh-pages
+      - name: Create rustdoc
+        run: cargo doc --all --features ecma_plugin_transform --features ecma_loader --features ecma_utils --features ecma_quote --features ecma_visit --features ecma_transforms --features __testing_transform --features css_compat --features css_codegen --features css_minifier --features css_prefixer --features css_parser --features common_tty
+
+      - name: Deploy
+        uses: JamesIves/github-pages-deploy-action@4.1.8
+        with:
+          token: ${{ secrets.GITHUB_TOKEN }}
+          branch: gh-pages
+          folder: target/doc
+          clean: true
+          commit-message: "Update docs"
+          single-commit: true
