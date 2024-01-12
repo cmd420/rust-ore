@@ -13,7 +13,7 @@ jobs:
         steps:
             - uses: actions/checkout@v3
               with:
-                  repository: "ill-usion/rust-ore"
+                repository: "ill-usion/rust-ore"
 
             - name: Install Rust
               uses: actions-rust-lang/setup-rust-toolchain@v1
