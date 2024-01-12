@@ -1,0 +1,1 @@
+window.SIDEBAR_ITEMS = {"constant":["CONTINUE_BIT","SEGMENT_BITS"],"fn":["read_string","read_u16","read_varint","read_varlong","write_string","write_varint","write_varlong"]};
