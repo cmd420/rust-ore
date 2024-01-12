@@ -27,27 +27,29 @@
 <a href="#27" id="27">27</a>
 <a href="#28" id="28">28</a>
 <a href="#29" id="29">29</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::{error::Error, net::TcpListener, thread};
+<a href="#30" id="30">30</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::{error::Error, net::TcpListener, thread, sync::Arc};
 
 <span class="kw">use crate</span>::{client::Client, config::ServerConfig};
 
 <span class="kw">pub struct </span>Server {
     listener: TcpListener,
-    <span class="kw">pub </span>config: ServerConfig,
+    <span class="kw">pub </span>config: Arc&lt;ServerConfig&gt; ,
 }
 
 <span class="kw">impl </span>Server {
     <span class="doccomment">/// Create a new server instance
     </span><span class="kw">pub fn </span>new(config: ServerConfig) -&gt; <span class="self">Self </span>{
         <span class="kw">let </span>listener = TcpListener::bind(<span class="macro">format!</span>(<span class="string">&quot;{}:{}&quot;</span>, config.host, config.port)).unwrap();
-        <span class="self">Self </span>{ listener, config }
+        <span class="self">Self </span>{ listener, config: Arc::new(config) }
     }
 
     <span class="doccomment">/// Run the server
     </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), Box&lt;<span class="kw">dyn </span>Error&gt;&gt; {
         <span class="kw">loop </span>{
             <span class="kw">if let </span><span class="prelude-val">Ok</span>((stream, <span class="kw">_</span>)) = <span class="self">self</span>.listener.accept() {
-                <span class="kw">let </span><span class="kw-2">mut </span>client = Client::new(stream);
+                <span class="kw">let </span>config = <span class="self">self</span>.config.clone();
+                <span class="kw">let </span><span class="kw-2">mut </span>client = Client::new(stream, config);
                 thread::spawn(<span class="kw">move </span>|| <span class="kw">match </span>client.run() {
                     <span class="prelude-val">Ok</span>(()) =&gt; (),
                     <span class="prelude-val">Err</span>(err) =&gt; <span class="macro">println!</span>(<span class="string">&quot;Client error ocurred: {}&quot;</span>, err),

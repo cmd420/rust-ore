@@ -96,57 +96,113 @@
 <a href="#96" id="96">96</a>
 <a href="#97" id="97">97</a>
 <a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+<a href="#100" id="100">100</a>
+<a href="#101" id="101">101</a>
+<a href="#102" id="102">102</a>
+<a href="#103" id="103">103</a>
+<a href="#104" id="104">104</a>
+<a href="#105" id="105">105</a>
+<a href="#106" id="106">106</a>
+<a href="#107" id="107">107</a>
+<a href="#108" id="108">108</a>
+<a href="#109" id="109">109</a>
+<a href="#110" id="110">110</a>
+<a href="#111" id="111">111</a>
+<a href="#112" id="112">112</a>
+<a href="#113" id="113">113</a>
+<a href="#114" id="114">114</a>
+<a href="#115" id="115">115</a>
+<a href="#116" id="116">116</a>
+<a href="#117" id="117">117</a>
+<a href="#118" id="118">118</a>
+<a href="#119" id="119">119</a>
+<a href="#120" id="120">120</a>
+<a href="#121" id="121">121</a>
+<a href="#122" id="122">122</a>
+<a href="#123" id="123">123</a>
+<a href="#124" id="124">124</a>
+<a href="#125" id="125">125</a>
+<a href="#126" id="126">126</a>
+<a href="#127" id="127">127</a>
+<a href="#128" id="128">128</a>
+<a href="#129" id="129">129</a>
+<a href="#130" id="130">130</a>
+<a href="#131" id="131">131</a>
+<a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::{
     error::Error,
     io::{Read, Write},
     net::TcpStream,
+    sync::Arc,
 };
 
-<span class="kw">use crate</span>::{client_state::ClientState, mc_packet::MCPacket, player::Player};
+<span class="kw">use crate</span>::{
+    client_state::ClientState, mc_packet::MCPacket, player::Player, prelude::ServerConfig,
+};
 
 <span class="kw">pub struct </span>Client {
     stream: TcpStream,
     state: ClientState,
     player: Player,
+    config: Arc&lt;ServerConfig&gt;,
+    is_running: bool,
 }
 
 <span class="kw">impl </span>Client {
     <span class="doccomment">/// Creates a new instance
-    </span><span class="kw">pub fn </span>new(stream: TcpStream) -&gt; <span class="self">Self </span>{
+    </span><span class="kw">pub fn </span>new(stream: TcpStream, config: Arc&lt;ServerConfig&gt;) -&gt; <span class="self">Self </span>{
         <span class="self">Self </span>{
             stream,
             state: ClientState::Handshake,
             player: Player::default(),
+            config,
+            is_running: <span class="bool-val">false</span>,
         }
+    }
+
+    <span class="doccomment">/// Closes the connection between the server and client.
+    /// Sets `is_running` to false, for now.
+    </span><span class="kw">pub fn </span>close(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
+        <span class="self">self</span>.is_running = <span class="bool-val">false</span>;
     }
 
     <span class="doccomment">/// Runs the client instance
     </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), Box&lt;<span class="kw">dyn </span>Error&gt;&gt; {
-        <span class="kw">let </span><span class="kw-2">mut </span>buffer = [<span class="number">0u8</span>; <span class="number">1024</span>];
-        <span class="kw">while let </span><span class="prelude-val">Ok</span>(length) = <span class="self">self</span>.stream.read(<span class="kw-2">&amp;mut </span>buffer) {
-            <span class="kw">let </span>packet = MCPacket::parse(buffer[..length].into());
-
-            <span class="macro">println!</span>(<span class="string">&quot;Raw Packet: {:?}&quot;</span>, <span class="kw-2">&amp;</span>buffer[..length]);
-            <span class="macro">println!</span>(<span class="string">&quot;Packet ID: {}&quot;</span>, packet.id);
-            <span class="macro">println!</span>(<span class="string">&quot;Packet Length: {}&quot;</span>, packet.length);
-            <span class="macro">println!</span>(<span class="string">&quot;Packet Data Length: {}&quot;</span>, packet.data.len());
-            <span class="macro">println!</span>(<span class="string">&quot;Total Packet Length: {}&quot;</span>, length);
-
-            <span class="kw">match </span><span class="self">self</span>.state {
-                ClientState::Handshake =&gt; <span class="self">self</span>.handle_handshake(packet),
-                ClientState::Status =&gt; <span class="macro">unimplemented!</span>(),
-                ClientState::Login =&gt; <span class="self">self</span>.handle_login(packet),
-                ClientState::Configuration =&gt; {
-                    <span class="macro">unimplemented!</span>()
-                }
-                ClientState::Play =&gt; <span class="macro">unimplemented!</span>(),
-            }
-
-            <span class="macro">println!</span>(<span class="string">&quot;End of packet\n&quot;</span>);
+        <span class="kw">if </span><span class="self">self</span>.is_running {
+            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
         }
 
-        <span class="macro">println!</span>(<span class="string">&quot;Socket closed.&quot;</span>);
-        <span class="prelude-val">Ok</span>(())
+        <span class="self">self</span>.is_running = <span class="bool-val">true</span>;
+        <span class="kw">let </span><span class="kw-2">mut </span>buffer = [<span class="number">0u8</span>; <span class="number">1024</span>];
+        <span class="kw">loop </span>{
+            <span class="kw">if </span>!<span class="self">self</span>.is_running {
+                <span class="macro">println!</span>(<span class="string">&quot;Closing connection&quot;</span>);
+                <span class="comment">// TODO: return a proper error
+                </span><span class="kw">return </span><span class="prelude-val">Ok</span>(());
+            }
+
+            <span class="kw">if let </span><span class="prelude-val">Ok</span>(length) = <span class="self">self</span>.stream.read(<span class="kw-2">&amp;mut </span>buffer) {
+                <span class="kw">let </span>packet = MCPacket::parse(buffer[..length].into());
+
+                <span class="macro">println!</span>(<span class="string">&quot;Raw Packet: {:?}&quot;</span>, <span class="kw-2">&amp;</span>buffer[..length]);
+                <span class="macro">println!</span>(<span class="string">&quot;Packet ID: {}&quot;</span>, packet.id);
+                <span class="macro">println!</span>(<span class="string">&quot;Packet Length: {}&quot;</span>, packet.length);
+                <span class="macro">println!</span>(<span class="string">&quot;Packet Data Length: {}&quot;</span>, packet.data.len());
+                <span class="macro">println!</span>(<span class="string">&quot;Total Packet Length: {}&quot;</span>, length);
+
+                <span class="kw">match </span><span class="self">self</span>.state {
+                    ClientState::Handshake =&gt; <span class="self">self</span>.handle_handshake(packet),
+                    ClientState::Status =&gt; <span class="macro">unimplemented!</span>(),
+                    ClientState::Login =&gt; <span class="self">self</span>.handle_login(packet),
+                    ClientState::Configuration =&gt; <span class="macro">unimplemented!</span>(),
+                    ClientState::Play =&gt; <span class="macro">unimplemented!</span>(),
+                }
+
+                <span class="macro">println!</span>(<span class="string">&quot;End of packet\n&quot;</span>);
+            }
+        }
     }
 
     <span class="doccomment">/// Handle handshaking
@@ -158,7 +214,14 @@
                 <span class="kw">let </span>server_port = packet.read_unsigned_short().expect(<span class="string">&quot;server port&quot;</span>);
                 <span class="kw">let </span>next_state = packet.read_varint().expect(<span class="string">&quot;next state&quot;</span>);
 
-                <span class="macro">println!</span>(<span class="string">&quot;Protocol Version: {}&quot;</span>, prot_ver);
+                <span class="kw">if </span>server_host != <span class="self">self</span>.config.host {
+                    <span class="macro">println!</span>(<span class="string">&quot;Invalid host&quot;</span>);
+                    <span class="self">self</span>.close();
+                    <span class="kw">return</span>;
+                }
+                <span class="comment">// TODO: validate protocol version
+
+                </span><span class="macro">println!</span>(<span class="string">&quot;Protocol Version: {}&quot;</span>, prot_ver);
                 <span class="macro">println!</span>(<span class="string">&quot;Server Host: {}&quot;</span>, server_host);
                 <span class="macro">println!</span>(<span class="string">&quot;Server Port: {}&quot;</span>, server_port);
                 <span class="macro">println!</span>(<span class="string">&quot;Next State: {}&quot;</span>, next_state);
@@ -175,20 +238,27 @@
             <span class="comment">// Login Start
             </span><span class="number">0x00 </span>=&gt; {
                 <span class="self">self</span>.player.username = packet.read_string().expect(<span class="string">&quot;username&quot;</span>);
-                <span class="kw">let </span>uuid = uuid::Uuid::new_v3(<span class="kw-2">&amp;</span>uuid::Uuid::NAMESPACE_DNS, <span class="self">self</span>.player.username.as_bytes());
+                <span class="kw">if </span><span class="self">self</span>.config.online_mode {
+                    <span class="macro">unimplemented!</span>()
+                } <span class="kw">else </span>{
+                    <span class="kw">let </span>uuid = uuid::Uuid::new_v3(
+                        <span class="kw-2">&amp;</span>uuid::Uuid::NAMESPACE_DNS,
+                        <span class="self">self</span>.player.username.as_bytes(),
+                    );
 
-                <span class="macro">println!</span>(<span class="string">&quot;Player Username: {}&quot;</span>, <span class="self">self</span>.player.username);
-                <span class="macro">println!</span>(<span class="string">&quot;Generated UUID: {}&quot;</span>, uuid);
+                    <span class="macro">println!</span>(<span class="string">&quot;Player Username: {}&quot;</span>, <span class="self">self</span>.player.username);
+                    <span class="macro">println!</span>(<span class="string">&quot;Generated UUID: {}&quot;</span>, uuid);
 
-                <span class="kw">let </span><span class="kw-2">mut </span>response = MCPacket::new(<span class="number">0x02</span>);
-                response.write_string(<span class="kw-2">&amp;</span>uuid.to_string());
-                response.write_string(<span class="kw-2">&amp;</span><span class="self">self</span>.player.username);
+                    <span class="kw">let </span><span class="kw-2">mut </span>response = MCPacket::new(<span class="number">0x02</span>);
+                    response.write_string(<span class="kw-2">&amp;</span>uuid.to_string());
+                    response.write_string(<span class="kw-2">&amp;</span><span class="self">self</span>.player.username);
 
-                <span class="kw">let </span>response_bytes = response.finalize();
-                <span class="macro">println!</span>(<span class="string">&quot;Response Bytes: {:?}&quot;</span>, response_bytes);
+                    <span class="kw">let </span>response_bytes = response.finalize();
+                    <span class="macro">println!</span>(<span class="string">&quot;Response Bytes: {:?}&quot;</span>, response_bytes);
 
-                <span class="self">self</span>.stream.write_all(<span class="kw-2">&amp;</span>response_bytes).unwrap();
-                <span class="self">self</span>.state = ClientState::Play;
+                    <span class="self">self</span>.stream.write_all(<span class="kw-2">&amp;</span>response_bytes).unwrap();
+                    <span class="self">self</span>.state = ClientState::Play;
+                }
             }
             <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Invalid Packet ID!&quot;</span>),
         }

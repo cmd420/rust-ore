@@ -182,7 +182,7 @@
             <span class="kw">break</span>;
         }
 
-        packet.push(((value &amp; SEGMENT_BITS <span class="kw">as </span>i32) | CONTINUE_BIT <span class="kw">as </span>i32) <span class="kw">as </span>u8);
+        packet.push(((_value &amp; SEGMENT_BITS <span class="kw">as </span>i32) | CONTINUE_BIT <span class="kw">as </span>i32) <span class="kw">as </span>u8);
         _value &gt;&gt;= <span class="number">7</span>;
     }
 }
@@ -196,7 +196,7 @@
             <span class="kw">break</span>;
         }
 
-        packet.push(((value &amp; SEGMENT_BITS <span class="kw">as </span>i64) | CONTINUE_BIT <span class="kw">as </span>i64) <span class="kw">as </span>u8);
+        packet.push(((_value &amp; SEGMENT_BITS <span class="kw">as </span>i64) | CONTINUE_BIT <span class="kw">as </span>i64) <span class="kw">as </span>u8);
         _value &gt;&gt;= <span class="number">7</span>;
     }
 }
