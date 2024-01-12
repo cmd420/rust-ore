@@ -64,7 +64,7 @@ pub fn write_varint(value: i32, packet: &mut Vec<u8>) {
             break;
         }
 
-        packet.push(((value & SEGMENT_BITS as i32) | CONTINUE_BIT as i32) as u8);
+        packet.push(((_value & SEGMENT_BITS as i32) | CONTINUE_BIT as i32) as u8);
         _value >>= 7;
     }
 }
@@ -78,7 +78,7 @@ pub fn write_varlong(value: i64, packet: &mut Vec<u8>) {
             break;
         }
 
-        packet.push(((value & SEGMENT_BITS as i64) | CONTINUE_BIT as i64) as u8);
+        packet.push(((_value & SEGMENT_BITS as i64) | CONTINUE_BIT as i64) as u8);
         _value >>= 7;
     }
 }
