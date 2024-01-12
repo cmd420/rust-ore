@@ -1,31 +1,31 @@
 name: Docs
 
 on:
-  push:
-    branches:
-      -  main
+    push:
+        branches:
+            - main
 
 jobs:
-  rustdoc:
-    name: Rustdoc
-    runs-on: ubuntu-latest
+    rustdoc:
+        name: Rustdoc
+        runs-on: ubuntu-latest
 
-    steps:
-      - uses: actions/checkout@v3
-        with:
-          repository: 'cmd420/rust-ore'
+        steps:
+            - uses: actions/checkout@v3
+              with:
+                  repository: "ill-usion/rust-ore"
 
-      - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
+            - name: Install Rust
+              uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Create documentation
-        run: cargo doc --no-deps --document-private-items
-        
-      - name: Deploy
-        uses: JamesIves/github-pages-deploy-action@4.1.8
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          branch: gh-pages
-          folder: target/doc
-          commit-message: "Update docs"
-          clean: true
+            - name: Create documentation
+              run: cargo doc --no-deps --document-private-items
+
+            - name: Deploy
+              uses: JamesIves/github-pages-deploy-action@4.1.8
+              with:
+                  token: ${{ secrets.GITHUB_TOKEN }}
+                  branch: gh-pages
+                  folder: target/doc
+                  commit-message: "Update docs"
+                  clean: true
