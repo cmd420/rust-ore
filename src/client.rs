@@ -44,7 +44,6 @@ impl Client {
                 ClientState::Play => unimplemented!(),
             }
 
-            // self.stream.write_all(&buffer[..length])?;
             println!("End of packet\n");
         }
 
