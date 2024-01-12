@@ -5,8 +5,6 @@ fn main() -> Result<(), Box<dyn std::error::Error>> {
         online_mode: false,
         ..Default::default()
     };
-    let mut server = Server::new(config);
 
-    server.run()?;
-    Ok(())
+    Server::new(config).run()
 }
