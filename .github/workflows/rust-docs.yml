@@ -22,7 +22,7 @@ jobs:
               run: cargo doc --no-deps --document-private-items
             
             - name: Add redirect page
-              run: printf "<script>window.location.href = '/rust_ore/index.html';</script>" > target/doc/404.html
+              run: printf "<script>window.location.href = '/rust-ore/rust_ore/index.html';</script>" > target/doc/404.html
 
             - name: Deploy
               uses: JamesIves/github-pages-deploy-action@4.1.8
