@@ -22,7 +22,7 @@ jobs:
         run: cargo doc --no-deps --document-private-items
         
       - name: Move docs to root folder
-        run: mv target/doc/rust_ore target/doc
+        run: mv target/doc/* target/doc
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.8
