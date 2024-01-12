@@ -27,5 +27,5 @@ jobs:
           token: ${{ secrets.GITHUB_TOKEN }}
           branch: gh-pages
           folder: target/doc
-          clean: true
           commit-message: "Update docs"
+          clean: true
