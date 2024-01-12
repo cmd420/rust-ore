@@ -19,7 +19,7 @@ jobs:
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
       - name: Create documentation
-        run: cargo doc --no-deps --document-private-items
+        run: cargo doc --no-deps --document-private-items --document-root
 
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@4.1.8
