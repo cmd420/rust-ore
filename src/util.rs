@@ -3,69 +3,78 @@ const CONTINUE_BIT: u8 = 0x80;
 
 /// Read a 32-bit integer
 pub fn read_varint(data: &mut Vec<u8>) -> Option<i32> {
-    let mut bytes = data.iter();
-    let mut value = 0;
-    let mut position = 0;
-    let mut bytes_read: usize = 0;
+    let mut result = 0;
+    let mut shift = 0;
 
-    loop {
-        let curr_byte = bytes.next().unwrap();
-        bytes_read += 1;
-        value |= ((curr_byte & SEGMENT_BITS) << position) as i32;
+    for byte in data.iter() {
+        let value = *byte & !CONTINUE_BIT;
+        result |= (value as i32) << shift;
 
-        if curr_byte & CONTINUE_BIT == 0 {
-            break;
+        if *byte & CONTINUE_BIT == 0 {
+            data.drain(0..shift / 7 + 1);
+            return Some(result);
         }
 
-        position += 7;
-
-        if position > 32 {
-            panic!("VarInt is too big!");
-        }
+        shift += 7;
     }
 
-    *data = data.split_off(bytes_read);
-    Some(value)
+    None
 }
 
 /// Read a 64-bit integer
 pub fn read_varlong(data: &mut Vec<u8>) -> Option<i64> {
-    let mut bytes = data.iter();
-    let mut value = 0;
-    let mut position = 0;
-    let mut bytes_read: usize = 0;
+    let mut result = 0;
+    let mut shift = 0;
 
-    loop {
-        let curr_byte = bytes.next().unwrap();
-        bytes_read += 1;
-        value |= ((curr_byte & SEGMENT_BITS) << position) as i64;
+    for byte in data.iter() {
+        let value = *byte & !CONTINUE_BIT;
+        result |= (value as i64) << shift;
 
-        if curr_byte & CONTINUE_BIT == 0 {
-            break;
+        if *byte & CONTINUE_BIT == 0 {
+            data.drain(0..shift / 7 + 1);
+            return Some(result);
         }
 
-        position += 7;
+        shift += 7;
 
-        if position > 64 {
-            panic!("VarLong is too big!");
+        if shift == 63 {
+            let last_byte = *byte as i64;
+            if last_byte & 0xFE != 0xFE {
+                return None;
+            }
         }
     }
 
-    *data = data.split_off(bytes_read);
-    Some(value)
+    None
 }
 
 /// Write a 32-bit integer
 pub fn write_varint(value: i32, packet: &mut Vec<u8>) {
+    // let mut _value = value;
+    // loop {
+    //     if (_value & !SEGMENT_BITS as i32) == 0 {
+    //         packet.push(_value as u8);
+    //         break;
+    //     }
+
+    //     packet.push(((_value & SEGMENT_BITS as i32) | CONTINUE_BIT as i32) as u8);
+    //     _value >>= 7;
+    // }
     let mut _value = value;
+
     loop {
-        if (_value & !SEGMENT_BITS as i32) == 0 {
-            packet.push(_value as u8);
-            break;
+        let mut byte = (_value & SEGMENT_BITS as i32) as u8;
+        _value >>= 7;
+
+        if _value != 0 {
+            byte |= CONTINUE_BIT;
         }
 
-        packet.push(((_value & SEGMENT_BITS as i32) | CONTINUE_BIT as i32) as u8);
-        _value >>= 7;
+        packet.push(byte);
+
+        if _value == 0 {
+            break;
+        }
     }
 }
 
