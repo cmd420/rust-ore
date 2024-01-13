@@ -7,6 +7,7 @@ use std::{
 
 use crate::{
     client_state::ClientState, mc_packet::MCPacket, player::Player, prelude::ServerConfig,
+    uuid::UUID,
 };
 
 pub struct Client {
@@ -108,16 +109,14 @@ impl Client {
                 if self.config.online_mode {
                     unimplemented!()
                 } else {
-                    let uuid = uuid::Uuid::new_v3(
-                        &uuid::Uuid::NAMESPACE_DNS,
-                        self.player.username.as_bytes(),
-                    );
+                    let uuid = UUID::new_rand();
+                    let uuid_str = uuid.to_string();
 
                     println!("Player Username: {}", self.player.username);
-                    println!("Generated UUID: {}", uuid);
+                    println!("Generated UUID: {}", uuid_str);
 
                     let mut response = MCPacket::new(0x02);
-                    response.write_string(&uuid.to_string());
+                    response.write_string(&uuid_str);
                     response.write_string(&self.player.username);
 
                     let response_bytes = response.finalize();
