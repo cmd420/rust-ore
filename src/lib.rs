@@ -6,6 +6,7 @@ pub mod mc_packet;
 pub mod player;
 pub mod server;
 pub mod util;
+pub mod uuid;
 
 pub mod prelude {
     pub use crate::client::Client;
