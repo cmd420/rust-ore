@@ -1,3 +1,6 @@
+/// Minecraft 1.16.5 protocol version
+pub const PROTOCOL_VERSION: i32 = 754;
+
 // TODO: allow reading config from file
 pub struct ServerConfig {
     pub host: String,

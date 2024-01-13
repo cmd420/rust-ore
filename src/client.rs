@@ -6,7 +6,7 @@ use std::{
 };
 
 use crate::{
-    client_state::ClientState, mc_packet::MCPacket, player::Player, prelude::ServerConfig,
+    client_state::ClientState, mc_packet::MCPacket, player::Player, prelude::ServerConfig, config::PROTOCOL_VERSION,
     uuid::UUID,
 };
 
@@ -87,7 +87,12 @@ impl Client {
                     self.close();
                     return;
                 }
-                // TODO: validate protocol version
+                
+                if prot_ver != PROTOCOL_VERSION {
+                    println!("Invalid protocol version");
+                    self.close();
+                    return;
+                }
 
                 println!("Protocol Version: {}", prot_ver);
                 println!("Server Host: {}", server_host);
