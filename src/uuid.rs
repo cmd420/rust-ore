@@ -5,6 +5,7 @@ use rand::prelude::*;
 pub struct UUID {
     msb: i64,
     lsb: i64,
+    bytes: [u8; 16]
 }
 
 impl UUID {
@@ -35,7 +36,7 @@ impl UUID {
             lsb = (lsb << 8) | *byte as i64
         }
 
-        Self { msb, lsb }
+        Self { msb, lsb, bytes: *data }
     }
 
     // pub fn version(&self) -> i64 {
@@ -65,5 +66,12 @@ impl ToString for UUID {
             Self::digits(self.lsb >> 48, 4),
             Self::digits(self.lsb, 12)
         )
+    }
+}
+
+
+impl AsRef<[u8; 16]> for UUID {
+    fn as_ref(&self) -> &[u8; 16] {
+        &self.bytes
     }
 }

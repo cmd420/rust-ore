@@ -121,7 +121,7 @@ impl Client {
                     println!("Generated UUID: {}", uuid_str);
 
                     let mut response = MCPacket::new(0x02);
-                    response.write_string(&uuid_str);
+                    response.write_uuid(uuid);
                     response.write_string(&self.player.username);
 
                     let response_bytes = response.finalize();

@@ -85,4 +85,13 @@ impl MCPacket {
     pub fn read_unsigned_short(&mut self) -> Option<u16> {
         read_u16(&mut self.data)
     }
+
+    // TODO: implement write_unsigned_short
+
+    // TODO: implement read_uuid
+
+    /// Write UUID bytes
+    pub fn write_uuid(&mut self, uuid: impl AsRef<[u8; 16]>) {
+        self.data.extend_from_slice(uuid.as_ref());
+    }
 }
