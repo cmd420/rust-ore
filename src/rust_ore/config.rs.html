@@ -14,7 +14,13 @@
 <a href="#14" id="14">14</a>
 <a href="#15" id="15">15</a>
 <a href="#16" id="16">16</a>
-</pre></div><pre class="rust"><code><span class="comment">// TODO: allow reading config from file
+<a href="#17" id="17">17</a>
+<a href="#18" id="18">18</a>
+<a href="#19" id="19">19</a>
+</pre></div><pre class="rust"><code><span class="doccomment">/// Minecraft 1.16.5 protocol version
+</span><span class="kw">pub const </span>PROTOCOL_VERSION: i32 = <span class="number">754</span>;
+
+<span class="comment">// TODO: allow reading config from file
 </span><span class="kw">pub struct </span>ServerConfig {
     <span class="kw">pub </span>host: String,
     <span class="kw">pub </span>port: u16,

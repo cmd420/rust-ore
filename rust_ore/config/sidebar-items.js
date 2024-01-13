@@ -1,1 +1,1 @@
-window.SIDEBAR_ITEMS = {"struct":["ServerConfig"]};
+window.SIDEBAR_ITEMS = {"constant":["PROTOCOL_VERSION"],"struct":["ServerConfig"]};

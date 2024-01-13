@@ -130,6 +130,11 @@
 <a href="#130" id="130">130</a>
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
+<a href="#133" id="133">133</a>
+<a href="#134" id="134">134</a>
+<a href="#135" id="135">135</a>
+<a href="#136" id="136">136</a>
+<a href="#137" id="137">137</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::{
     error::Error,
     io::{Read, Write},
@@ -138,7 +143,7 @@
 };
 
 <span class="kw">use crate</span>::{
-    client_state::ClientState, mc_packet::MCPacket, player::Player, prelude::ServerConfig,
+    client_state::ClientState, mc_packet::MCPacket, player::Player, prelude::ServerConfig, config::PROTOCOL_VERSION,
     uuid::UUID,
 };
 
@@ -219,9 +224,14 @@
                     <span class="self">self</span>.close();
                     <span class="kw">return</span>;
                 }
-                <span class="comment">// TODO: validate protocol version
+                
+                <span class="kw">if </span>prot_ver != PROTOCOL_VERSION {
+                    <span class="macro">println!</span>(<span class="string">&quot;Invalid protocol version&quot;</span>);
+                    <span class="self">self</span>.close();
+                    <span class="kw">return</span>;
+                }
 
-                </span><span class="macro">println!</span>(<span class="string">&quot;Protocol Version: {}&quot;</span>, prot_ver);
+                <span class="macro">println!</span>(<span class="string">&quot;Protocol Version: {}&quot;</span>, prot_ver);
                 <span class="macro">println!</span>(<span class="string">&quot;Server Host: {}&quot;</span>, server_host);
                 <span class="macro">println!</span>(<span class="string">&quot;Server Port: {}&quot;</span>, server_port);
                 <span class="macro">println!</span>(<span class="string">&quot;Next State: {}&quot;</span>, next_state);
@@ -248,7 +258,7 @@
                     <span class="macro">println!</span>(<span class="string">&quot;Generated UUID: {}&quot;</span>, uuid_str);
 
                     <span class="kw">let </span><span class="kw-2">mut </span>response = MCPacket::new(<span class="number">0x02</span>);
-                    response.write_string(<span class="kw-2">&amp;</span>uuid_str);
+                    response.write_uuid(uuid);
                     response.write_string(<span class="kw-2">&amp;</span><span class="self">self</span>.player.username);
 
                     <span class="kw">let </span>response_bytes = response.finalize();
