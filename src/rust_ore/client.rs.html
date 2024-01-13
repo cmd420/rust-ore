@@ -130,7 +130,6 @@
 <a href="#130" id="130">130</a>
 <a href="#131" id="131">131</a>
 <a href="#132" id="132">132</a>
-<a href="#133" id="133">133</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::{
     error::Error,
     io::{Read, Write},
@@ -140,6 +139,7 @@
 
 <span class="kw">use crate</span>::{
     client_state::ClientState, mc_packet::MCPacket, player::Player, prelude::ServerConfig,
+    uuid::UUID,
 };
 
 <span class="kw">pub struct </span>Client {
@@ -241,16 +241,14 @@
                 <span class="kw">if </span><span class="self">self</span>.config.online_mode {
                     <span class="macro">unimplemented!</span>()
                 } <span class="kw">else </span>{
-                    <span class="kw">let </span>uuid = uuid::Uuid::new_v3(
-                        <span class="kw-2">&amp;</span>uuid::Uuid::NAMESPACE_DNS,
-                        <span class="self">self</span>.player.username.as_bytes(),
-                    );
+                    <span class="kw">let </span>uuid = UUID::new_rand();
+                    <span class="kw">let </span>uuid_str = uuid.to_string();
 
                     <span class="macro">println!</span>(<span class="string">&quot;Player Username: {}&quot;</span>, <span class="self">self</span>.player.username);
-                    <span class="macro">println!</span>(<span class="string">&quot;Generated UUID: {}&quot;</span>, uuid);
+                    <span class="macro">println!</span>(<span class="string">&quot;Generated UUID: {}&quot;</span>, uuid_str);
 
                     <span class="kw">let </span><span class="kw-2">mut </span>response = MCPacket::new(<span class="number">0x02</span>);
-                    response.write_string(<span class="kw-2">&amp;</span>uuid.to_string());
+                    response.write_string(<span class="kw-2">&amp;</span>uuid_str);
                     response.write_string(<span class="kw-2">&amp;</span><span class="self">self</span>.player.username);
 
                     <span class="kw">let </span>response_bytes = response.finalize();
