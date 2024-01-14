@@ -1,19 +1,23 @@
+use std::{collections::HashMap, error::Error, path::Path};
+
+use dot_properties_parser::{parse_properties_file, PropertyValue};
+
 /// Minecraft 1.16.5 protocol version
 pub const PROTOCOL_VERSION: i32 = 754;
 
-// TODO: allow reading config from file
-pub struct ServerConfig {
-    pub host: String,
-    pub port: u16,
-    pub online_mode: bool,
+pub struct ServerConfig(HashMap<String, PropertyValue>);
+
+impl ServerConfig {
+    pub fn from_file(path: &str) -> Result<ServerConfig, Box<dyn Error>> {
+        let path = Path::new(path);
+        parse_properties_file(path, None).map(ServerConfig)
+    }
 }
 
-impl Default for ServerConfig {
-    fn default() -> Self {
-        Self {
-            host: "127.0.0.1".to_owned(),
-            port: 25565,
-            online_mode: true,
-        }
+impl std::ops::Deref for ServerConfig {
+    type Target = HashMap<String, PropertyValue>;
+
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
