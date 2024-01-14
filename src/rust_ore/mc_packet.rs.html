@@ -95,7 +95,9 @@
 <a href="#95" id="95">95</a>
 <a href="#96" id="96">96</a>
 <a href="#97" id="97">97</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span><span class="kw">crate</span>::util::<span class="kw-2">*</span>;
+<a href="#98" id="98">98</a>
+<a href="#99" id="99">99</a>
+</pre></div><pre class="rust"><code><span class="kw">use crate</span>::{errors::PacketError, util::<span class="kw-2">*</span>};
 
 <span class="doccomment">/// Uncompressed Minecraft packet consisting of:
 /// - Packet length
@@ -137,15 +139,17 @@
     }
 
     <span class="doccomment">/// Parse packet from bytes
-    </span><span class="kw">pub fn </span>parse(<span class="kw-2">mut </span>bytes: Vec&lt;u8&gt;) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>length = read_varint(<span class="kw-2">&amp;mut </span>bytes).expect(<span class="string">&quot;length&quot;</span>);
-        <span class="kw">let </span>id = read_varint(<span class="kw-2">&amp;mut </span>bytes).expect(<span class="string">&quot;packet id&quot;</span>);
+    </span><span class="kw">pub fn </span>parse(<span class="kw-2">mut </span>bytes: Vec&lt;u8&gt;) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, PacketError&gt; {
+        <span class="kw">let </span>length = read_varint(<span class="kw-2">&amp;mut </span>bytes)
+            .ok_or_else(|| PacketError::ExpectedField(<span class="string">&quot;length&quot;</span>.to_string()))<span class="question-mark">?</span>;
+        <span class="kw">let </span>id = read_varint(<span class="kw-2">&amp;mut </span>bytes)
+            .ok_or_else(|| PacketError::ExpectedField(<span class="string">&quot;packet id&quot;</span>.to_string()))<span class="question-mark">?</span>;
 
-        MCPacket {
+        <span class="prelude-val">Ok</span>(MCPacket {
             length,
             id,
             data: bytes,
-        }
+        })
     }
 
     <span class="doccomment">/// Read a 32-bit integer

@@ -17,10 +17,13 @@
 <a href="#17" id="17">17</a>
 <a href="#18" id="18">18</a>
 <a href="#19" id="19">19</a>
+<a href="#20" id="20">20</a>
+<a href="#21" id="21">21</a>
 </pre></div><pre class="rust"><code><span class="kw">pub mod </span>client;
 <span class="kw">pub mod </span>client_state;
 <span class="kw">pub mod </span>config;
 <span class="kw">pub mod </span>entity;
+<span class="kw">pub mod </span>errors;
 <span class="kw">pub mod </span>mc_packet;
 <span class="kw">pub mod </span>player;
 <span class="kw">pub mod </span>server;
@@ -32,6 +35,7 @@
     <span class="kw">pub use </span><span class="kw">crate</span>::client_state::ClientState;
     <span class="kw">pub use </span><span class="kw">crate</span>::config::<span class="kw-2">*</span>;
     <span class="kw">pub use </span><span class="kw">crate</span>::entity::Entity;
+    <span class="kw">pub use </span><span class="kw">crate</span>::errors::<span class="kw-2">*</span>;
     <span class="kw">pub use </span><span class="kw">crate</span>::mc_packet::MCPacket;
     <span class="kw">pub use </span><span class="kw">crate</span>::player::Player;
     <span class="kw">pub use </span><span class="kw">crate</span>::server::Server;

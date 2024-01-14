@@ -28,31 +28,59 @@
 <a href="#28" id="28">28</a>
 <a href="#29" id="29">29</a>
 <a href="#30" id="30">30</a>
-</pre></div><pre class="rust"><code><span class="kw">use </span>std::{error::Error, net::TcpListener, thread, sync::Arc};
+<a href="#31" id="31">31</a>
+<a href="#32" id="32">32</a>
+<a href="#33" id="33">33</a>
+<a href="#34" id="34">34</a>
+<a href="#35" id="35">35</a>
+<a href="#36" id="36">36</a>
+<a href="#37" id="37">37</a>
+<a href="#38" id="38">38</a>
+<a href="#39" id="39">39</a>
+<a href="#40" id="40">40</a>
+<a href="#41" id="41">41</a>
+<a href="#42" id="42">42</a>
+<a href="#43" id="43">43</a>
+<a href="#44" id="44">44</a>
+</pre></div><pre class="rust"><code><span class="kw">use </span>std::{net::TcpListener, sync::Arc, thread};
 
-<span class="kw">use crate</span>::{client::Client, config::ServerConfig};
+<span class="kw">use crate</span>::{client::Client, config::ServerConfig, errors::ServerError};
 
 <span class="kw">pub struct </span>Server {
     listener: TcpListener,
-    <span class="kw">pub </span>config: Arc&lt;ServerConfig&gt; ,
+    <span class="kw">pub </span>config: Arc&lt;ServerConfig&gt;,
 }
 
 <span class="kw">impl </span>Server {
     <span class="doccomment">/// Create a new server instance
-    </span><span class="kw">pub fn </span>new(config: ServerConfig) -&gt; <span class="self">Self </span>{
-        <span class="kw">let </span>listener = TcpListener::bind(<span class="macro">format!</span>(<span class="string">&quot;{}:{}&quot;</span>, config.host, config.port)).unwrap();
-        <span class="self">Self </span>{ listener, config: Arc::new(config) }
+    </span><span class="kw">pub fn </span>new(config: ServerConfig) -&gt; <span class="prelude-ty">Result</span>&lt;<span class="self">Self</span>, ServerError&gt; {
+        <span class="kw">let </span>server = config
+            .get(<span class="string">&quot;server-host&quot;</span>)
+            .ok_or_else(|| ServerError::MissingProperty(<span class="string">&quot;server-host&quot;</span>.to_string()))<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>port = config
+            .get(<span class="string">&quot;server-port&quot;</span>)
+            .ok_or_else(|| ServerError::MissingProperty(<span class="string">&quot;server-port&quot;</span>.to_string()))<span class="question-mark">?</span>;
+
+        <span class="kw">let </span>listener = TcpListener::bind(<span class="macro">format!</span>(<span class="string">&quot;{}:{}&quot;</span>, server, port)).map_err(|err| {
+            ServerError::SocketBindFailed(server.to_string(), port.value_as(), err.to_string())
+        })<span class="question-mark">?</span>;
+
+        <span class="prelude-val">Ok</span>(<span class="self">Self </span>{
+            listener,
+            config: Arc::new(config),
+        })
     }
 
     <span class="doccomment">/// Run the server
-    </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), Box&lt;<span class="kw">dyn </span>Error&gt;&gt; {
+    </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>) {
         <span class="kw">loop </span>{
             <span class="kw">if let </span><span class="prelude-val">Ok</span>((stream, <span class="kw">_</span>)) = <span class="self">self</span>.listener.accept() {
                 <span class="kw">let </span>config = <span class="self">self</span>.config.clone();
                 <span class="kw">let </span><span class="kw-2">mut </span>client = Client::new(stream, config);
                 thread::spawn(<span class="kw">move </span>|| <span class="kw">match </span>client.run() {
                     <span class="prelude-val">Ok</span>(()) =&gt; (),
-                    <span class="prelude-val">Err</span>(err) =&gt; <span class="macro">println!</span>(<span class="string">&quot;Client error ocurred: {}&quot;</span>, err),
+                    <span class="prelude-val">Err</span>(err) =&gt; <span class="macro">eprintln!</span>(<span class="string">&quot;Client error ocurred: {}&quot;</span>, err),
                 });
             }
         }

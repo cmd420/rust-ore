@@ -135,16 +135,22 @@
 <a href="#135" id="135">135</a>
 <a href="#136" id="136">136</a>
 <a href="#137" id="137">137</a>
+<a href="#138" id="138">138</a>
+<a href="#139" id="139">139</a>
+<a href="#140" id="140">140</a>
+<a href="#141" id="141">141</a>
+<a href="#142" id="142">142</a>
+<a href="#143" id="143">143</a>
+<a href="#144" id="144">144</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::{
-    error::Error,
     io::{Read, Write},
     net::TcpStream,
     sync::Arc,
 };
 
 <span class="kw">use crate</span>::{
-    client_state::ClientState, mc_packet::MCPacket, player::Player, prelude::ServerConfig, config::PROTOCOL_VERSION,
-    uuid::UUID,
+    client_state::ClientState, config::PROTOCOL_VERSION, errors::ClientError, mc_packet::MCPacket,
+    player::Player, prelude::ServerConfig, uuid::UUID,
 };
 
 <span class="kw">pub struct </span>Client {
@@ -174,9 +180,9 @@
     }
 
     <span class="doccomment">/// Runs the client instance
-    </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), Box&lt;<span class="kw">dyn </span>Error&gt;&gt; {
+    </span><span class="kw">pub fn </span>run(<span class="kw-2">&amp;mut </span><span class="self">self</span>) -&gt; <span class="prelude-ty">Result</span>&lt;(), ClientError&gt; {
         <span class="kw">if </span><span class="self">self</span>.is_running {
-            <span class="kw">return </span><span class="prelude-val">Ok</span>(());
+            <span class="kw">return </span><span class="prelude-val">Err</span>(ClientError::AlreadyRunning);
         }
 
         <span class="self">self</span>.is_running = <span class="bool-val">true</span>;
@@ -184,12 +190,12 @@
         <span class="kw">loop </span>{
             <span class="kw">if </span>!<span class="self">self</span>.is_running {
                 <span class="macro">println!</span>(<span class="string">&quot;Closing connection&quot;</span>);
-                <span class="comment">// TODO: return a proper error
-                </span><span class="kw">return </span><span class="prelude-val">Ok</span>(());
+                <span class="kw">return </span><span class="prelude-val">Ok</span>(());
             }
 
             <span class="kw">if let </span><span class="prelude-val">Ok</span>(length) = <span class="self">self</span>.stream.read(<span class="kw-2">&amp;mut </span>buffer) {
-                <span class="kw">let </span>packet = MCPacket::parse(buffer[..length].into());
+                <span class="kw">let </span>packet = MCPacket::parse(buffer[..length].into())
+                    .map_err(|err| ClientError::PacketError(err.to_string()))<span class="question-mark">?</span>;
 
                 <span class="macro">println!</span>(<span class="string">&quot;Raw Packet: {:?}&quot;</span>, <span class="kw-2">&amp;</span>buffer[..length]);
                 <span class="macro">println!</span>(<span class="string">&quot;Packet ID: {}&quot;</span>, packet.id);
@@ -203,7 +209,7 @@
                     ClientState::Login =&gt; <span class="self">self</span>.handle_login(packet),
                     ClientState::Configuration =&gt; <span class="macro">unimplemented!</span>(),
                     ClientState::Play =&gt; <span class="macro">unimplemented!</span>(),
-                }
+                }<span class="question-mark">?</span>;
 
                 <span class="macro">println!</span>(<span class="string">&quot;End of packet\n&quot;</span>);
             }
@@ -211,7 +217,7 @@
     }
 
     <span class="doccomment">/// Handle handshaking
-    </span><span class="kw">fn </span>handle_handshake(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>packet: MCPacket) {
+    </span><span class="kw">fn </span>handle_handshake(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>packet: MCPacket) -&gt; <span class="prelude-ty">Result</span>&lt;(), ClientError&gt; {
         <span class="kw">match </span>packet.id {
             <span class="number">0x00 </span>=&gt; {
                 <span class="kw">let </span>prot_ver = packet.read_varint().expect(<span class="string">&quot;protocol version&quot;</span>);
@@ -219,16 +225,15 @@
                 <span class="kw">let </span>server_port = packet.read_unsigned_short().expect(<span class="string">&quot;server port&quot;</span>);
                 <span class="kw">let </span>next_state = packet.read_varint().expect(<span class="string">&quot;next state&quot;</span>);
 
-                <span class="kw">if </span>server_host != <span class="self">self</span>.config.host {
-                    <span class="macro">println!</span>(<span class="string">&quot;Invalid host&quot;</span>);
-                    <span class="self">self</span>.close();
-                    <span class="kw">return</span>;
+                <span class="kw">if </span>server_host != <span class="self">self</span>.config.get(<span class="string">&quot;server-host&quot;</span>).unwrap().as_ref() {
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(ClientError::IncorrectHost(server_host));
                 }
-                
+
                 <span class="kw">if </span>prot_ver != PROTOCOL_VERSION {
-                    <span class="macro">println!</span>(<span class="string">&quot;Invalid protocol version&quot;</span>);
-                    <span class="self">self</span>.close();
-                    <span class="kw">return</span>;
+                    <span class="kw">return </span><span class="prelude-val">Err</span>(ClientError::InvalidProtocolVersion(
+                        prot_ver,
+                        PROTOCOL_VERSION,
+                    ));
                 }
 
                 <span class="macro">println!</span>(<span class="string">&quot;Protocol Version: {}&quot;</span>, prot_ver);
@@ -238,17 +243,24 @@
 
                 <span class="self">self</span>.state = next_state.into();
             }
-            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Invalid Packet ID!&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ClientError::InvalidPacketID(packet.id)),
         }
+
+        <span class="prelude-val">Ok</span>(())
     }
 
     <span class="doccomment">/// Handle the Login process
-    </span><span class="kw">fn </span>handle_login(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>packet: MCPacket) {
+    </span><span class="kw">fn </span>handle_login(<span class="kw-2">&amp;mut </span><span class="self">self</span>, <span class="kw-2">mut </span>packet: MCPacket) -&gt; <span class="prelude-ty">Result</span>&lt;(), ClientError&gt; {
         <span class="kw">match </span>packet.id {
             <span class="comment">// Login Start
             </span><span class="number">0x00 </span>=&gt; {
                 <span class="self">self</span>.player.username = packet.read_string().expect(<span class="string">&quot;username&quot;</span>);
-                <span class="kw">if </span><span class="self">self</span>.config.online_mode {
+                <span class="kw">if </span><span class="self">self
+                    </span>.config
+                    .get(<span class="string">&quot;online-mode&quot;</span>)
+                    .unwrap_or(<span class="kw-2">&amp;</span><span class="bool-val">true</span>.into())
+                    .value_as()
+                {
                     <span class="macro">unimplemented!</span>()
                 } <span class="kw">else </span>{
                     <span class="kw">let </span>uuid = UUID::new_rand();
@@ -268,8 +280,10 @@
                     <span class="self">self</span>.state = ClientState::Play;
                 }
             }
-            <span class="kw">_ </span>=&gt; <span class="macro">panic!</span>(<span class="string">&quot;Invalid Packet ID!&quot;</span>),
+            <span class="kw">_ </span>=&gt; <span class="kw">return </span><span class="prelude-val">Err</span>(ClientError::InvalidPacketID(packet.id)),
         }
+
+        <span class="prelude-val">Ok</span>(())
     }
 }
 </code></pre></div></section></main></body></html>
