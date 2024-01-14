@@ -1,4 +1,4 @@
-use crate::util::*;
+use crate::{errors::PacketError, util::*};
 
 /// Uncompressed Minecraft packet consisting of:
 /// - Packet length
@@ -40,15 +40,17 @@ impl MCPacket {
     }
 
     /// Parse packet from bytes
-    pub fn parse(mut bytes: Vec<u8>) -> Self {
-        let length = read_varint(&mut bytes).expect("length");
-        let id = read_varint(&mut bytes).expect("packet id");
+    pub fn parse(mut bytes: Vec<u8>) -> Result<Self, PacketError> {
+        let length = read_varint(&mut bytes)
+            .ok_or_else(|| PacketError::ExpectedField("length".to_string()))?;
+        let id = read_varint(&mut bytes)
+            .ok_or_else(|| PacketError::ExpectedField("packet id".to_string()))?;
 
-        MCPacket {
+        Ok(MCPacket {
             length,
             id,
             data: bytes,
-        }
+        })
     }
 
     /// Read a 32-bit integer
