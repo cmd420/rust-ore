@@ -36,6 +36,8 @@
 <a href="#36" id="36">36</a>
 <a href="#37" id="37">37</a>
 <a href="#38" id="38">38</a>
+<a href="#39" id="39">39</a>
+<a href="#40" id="40">40</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>thiserror::Error;
 
 <span class="doccomment">/// Errors caused by the Minecraft client
@@ -58,7 +60,8 @@
     </span>PacketError(String),
 }
 
-<span class="attr">#[derive(Error, Debug)]
+<span class="doccomment">/// Errors caused by the server
+</span><span class="attr">#[derive(Error, Debug)]
 </span><span class="kw">pub enum </span>ServerError {
     <span class="doccomment">/// Required property in server configuration is missing
     </span><span class="attr">#[error(<span class="string">&quot;property `{0}` is missing&quot;</span>)]
@@ -68,7 +71,8 @@
     </span>SocketBindFailed(String, u16, String),
 }
 
-<span class="attr">#[derive(Error, Debug)]
+<span class="doccomment">/// Errors caused by Minecraft packets
+</span><span class="attr">#[derive(Error, Debug)]
 </span><span class="kw">pub enum </span>PacketError {
     <span class="doccomment">/// Expected a field of a certain type
     </span><span class="attr">#[error(<span class="string">&quot;expected field `{0}`&quot;</span>)]
