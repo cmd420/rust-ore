@@ -27,33 +27,51 @@
 <a href="#27" id="27">27</a>
 <a href="#28" id="28">28</a>
 <a href="#29" id="29">29</a>
+<a href="#30" id="30">30</a>
+<a href="#31" id="31">31</a>
+<a href="#32" id="32">32</a>
+<a href="#33" id="33">33</a>
+<a href="#34" id="34">34</a>
+<a href="#35" id="35">35</a>
+<a href="#36" id="36">36</a>
+<a href="#37" id="37">37</a>
+<a href="#38" id="38">38</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>thiserror::Error;
 
-<span class="attr">#[derive(Error, Debug)]
+<span class="doccomment">/// Errors caused by the Minecraft client
+</span><span class="attr">#[derive(Error, Debug)]
 </span><span class="kw">pub enum </span>ClientError {
-    <span class="attr">#[error(<span class="string">&quot;another instance of client is already running&quot;</span>)]
+    <span class="doccomment">/// Excluding this one
+    </span><span class="attr">#[error(<span class="string">&quot;another instance of client is already running&quot;</span>)]
     </span>AlreadyRunning,
-    <span class="attr">#[error(<span class="string">&quot;invalid packet id `{0}`&quot;</span>)]
+    <span class="doccomment">/// Client provided an invalid packet ID
+    </span><span class="attr">#[error(<span class="string">&quot;invalid packet id `{0}`&quot;</span>)]
     </span>InvalidPacketID(i32),
-    <span class="attr">#[error(<span class="string">&quot;packet contains an incorrect server host value `{0}`&quot;</span>)]
+    <span class="doccomment">/// Client provided a server host different than the one configured in server.properties
+    </span><span class="attr">#[error(<span class="string">&quot;packet contains an incorrect server host value `{0}`&quot;</span>)]
     </span>IncorrectHost(String),
-    <span class="attr">#[error(<span class="string">&quot;invalid protocol version `{0}`, expected `{1}`&quot;</span>)]
+    <span class="doccomment">/// Client is on a different Minecraft version
+    </span><span class="attr">#[error(<span class="string">&quot;invalid protocol version `{0}`, expected `{1}`&quot;</span>)]
     </span>InvalidProtocolVersion(i32, i32),
-    <span class="attr">#[error(<span class="string">&quot;error parsing packet: {0}&quot;</span>)]
+    <span class="doccomment">/// Packet parsing error, for now
+    </span><span class="attr">#[error(<span class="string">&quot;error parsing packet: {0}&quot;</span>)]
     </span>PacketError(String),
 }
 
 <span class="attr">#[derive(Error, Debug)]
 </span><span class="kw">pub enum </span>ServerError {
-    <span class="attr">#[error(<span class="string">&quot;property `{0}` is missing&quot;</span>)]
+    <span class="doccomment">/// Required property in server configuration is missing
+    </span><span class="attr">#[error(<span class="string">&quot;property `{0}` is missing&quot;</span>)]
     </span>MissingProperty(String),
-    <span class="attr">#[error(<span class="string">&quot;binding socket to host `{0}` port `{1}` failed: {2}&quot;</span>)]
+    <span class="doccomment">/// Binding to socket failed
+    </span><span class="attr">#[error(<span class="string">&quot;binding socket to host `{0}` port `{1}` failed: {2}&quot;</span>)]
     </span>SocketBindFailed(String, u16, String),
 }
 
 <span class="attr">#[derive(Error, Debug)]
 </span><span class="kw">pub enum </span>PacketError {
-    <span class="attr">#[error(<span class="string">&quot;expected field `{0}`&quot;</span>)]
+    <span class="doccomment">/// Expected a field of a certain type
+    </span><span class="attr">#[error(<span class="string">&quot;expected field `{0}`&quot;</span>)]
     </span>ExpectedField(String),
 }
 </code></pre></div></section></main></body></html>

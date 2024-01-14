@@ -21,6 +21,9 @@
 <a href="#21" id="21">21</a>
 <a href="#22" id="22">22</a>
 <a href="#23" id="23">23</a>
+<a href="#24" id="24">24</a>
+<a href="#25" id="25">25</a>
+<a href="#26" id="26">26</a>
 </pre></div><pre class="rust"><code><span class="kw">use </span>std::{collections::HashMap, error::Error, path::Path};
 
 <span class="kw">use </span>dot_properties_parser::{parse_properties_file, PropertyValue};
@@ -28,10 +31,13 @@
 <span class="doccomment">/// Minecraft 1.16.5 protocol version
 </span><span class="kw">pub const </span>PROTOCOL_VERSION: i32 = <span class="number">754</span>;
 
-<span class="kw">pub struct </span>ServerConfig(HashMap&lt;String, PropertyValue&gt;);
+<span class="doccomment">/// Key value pairs containing the server configuration
+</span><span class="kw">pub struct </span>ServerConfig(HashMap&lt;String, PropertyValue&gt;);
 
 <span class="kw">impl </span>ServerConfig {
-    <span class="kw">pub fn </span>from_file(path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;ServerConfig, Box&lt;<span class="kw">dyn </span>Error&gt;&gt; {
+    <span class="comment">// TODO: add better error handling than `Box&lt;dyn Error&gt;`
+    </span><span class="doccomment">/// Parses a `server.properties` file
+    </span><span class="kw">pub fn </span>from_file(path: <span class="kw-2">&amp;</span>str) -&gt; <span class="prelude-ty">Result</span>&lt;ServerConfig, Box&lt;<span class="kw">dyn </span>Error&gt;&gt; {
         <span class="kw">let </span>path = Path::new(path);
         parse_properties_file(path, <span class="prelude-val">None</span>).map(ServerConfig)
     }
