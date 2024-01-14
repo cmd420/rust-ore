@@ -20,6 +20,7 @@ pub enum ClientError {
     PacketError(String),
 }
 
+/// Errors caused by the server
 #[derive(Error, Debug)]
 pub enum ServerError {
     /// Required property in server configuration is missing
@@ -30,6 +31,7 @@ pub enum ServerError {
     SocketBindFailed(String, u16, String),
 }
 
+/// Errors caused by Minecraft packets
 #[derive(Error, Debug)]
 pub enum PacketError {
     /// Expected a field of a certain type
